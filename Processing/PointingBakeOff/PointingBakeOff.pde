@@ -75,16 +75,66 @@ void draw()
   fill(255); //set fill color to white
   text((trialNum + 1) + " of " + trials.size(), 40, 20); //display what trial the user is on
 
+
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
+
+  drawDottedLines();
+
 
   fill(255, 0, 0, 200); // set fill color to translucent red
   ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
 }
 
-void mousePressed() // test to see if hit was in target!
-{
-  if (trialNum >= trials.size()) //if task is over, just return
+void drawDottedLines() {
+   if (trialNum >= trials.size()) return; // Don't draw lines if test is over
+  
+  stroke(80); // Set stroke color to white
+  strokeWeight(2); // Set stroke weight
+  
+  // Get current target button center
+  Rectangle currentBounds = getButtonLocation(trials.get(trialNum));
+  float currentCenterX = currentBounds.x + currentBounds.width / 2.0;
+  float currentCenterY = currentBounds.y + currentBounds.height / 2.0;
+  
+  // Draw dotted line from mouse to current target
+  drawDottedLine(mouseX, mouseY, currentCenterX, currentCenterY);
+  
+  // Draw dotted line from current target to next target (if there is a next target)
+  if (trialNum + 1 < trials.size()) {
+    Rectangle nextBounds = getButtonLocation(trials.get(trialNum + 1));
+    float nextCenterX = nextBounds.x + nextBounds.width / 2.0;
+    float nextCenterY = nextBounds.y + nextBounds.height / 2.0;
+    
+    drawDottedLine(currentCenterX, currentCenterY, nextCenterX, nextCenterY);
+  }
+  
+  noStroke(); // Turn off stroke for other drawing operations
+}
+
+void drawDottedLine(float x1, float y1, float x2, float y2) {
+  float distance = dist(x1, y1, x2, y2);
+  float dashLength = 8; // Length of each dash
+  float gapLength = 6;  // Length of each gap
+  float totalDashGap = dashLength + gapLength;
+  
+  // Calculate the direction vector
+  float dx = (x2 - x1) / distance;
+  float dy = (y2 - y1) / distance;
+  
+  // Draw dashes along the line
+  for (float i = 0; i < distance; i += totalDashGap) {
+    float startX = x1 + dx * i;
+    float startY = y1 + dy * i;
+    float endX = x1 + dx * min(i + dashLength, distance);
+    float endY = y1 + dy * min(i + dashLength, distance);
+    
+    line(startX, startY, endX, endY);
+  }
+}
+
+void checkMouse() {
+    if (trialNum >= trials.size()) //if task is over, just return
     return;
 
   if (trialNum == 0) //check if first click, if so, start timer
@@ -114,7 +164,13 @@ void mousePressed() // test to see if hit was in target!
   trialNum++; //Increment trial number
 
   //in this example code, we move the mouse back to the middle
-  robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
+  // robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
+
+}
+
+void mousePressed() // test to see if hit was in target!
+{
+  checkMouse();
 }  
 
 //probably shouldn't have to edit this method
@@ -132,8 +188,10 @@ void drawButton(int i)
 
   if (trials.get(trialNum) == i) // see if current button is the target
     fill(0, 255, 255); // if so, fill cyan
+  else if (trialNum+1 < trials.size() && trials.get(trialNum+1) == i) // see if current button is the next target
+    fill(0, 80, 80);
   else
-    fill(200); // if not, fill gray
+    fill(1); // if not, fill gray
 
   rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
 }
@@ -155,4 +213,6 @@ void keyPressed()
   //can use the keyboard if you wish
   //https://processing.org/reference/keyTyped_.html
   //https://processing.org/reference/keyCode.html
+  checkMouse();
+  System.out.println("clicked");
 }
