@@ -84,6 +84,35 @@ void draw()
 
   fill(255, 0, 0, 200); // set fill color to translucent red
   ellipse(mouseX, mouseY, 20, 20); //draw user cursor as a circle with a diameter of 20
+  
+  drawClicksRemaining();
+  drawStreak();
+}
+
+int currentStreak = 0;
+
+void drawStreak() {
+  textAlign(LEFT);
+  
+  if (currentStreak > 0) {
+    fill(255, 215, 0); // Gold color
+    textFont(createFont("Arial", 24));
+    text("STREAK: " + currentStreak, 400, 180);
+  }
+  
+  textFont(createFont("Arial", 16));
+  textAlign(CENTER);
+  noStroke();
+}
+
+void drawClicksRemaining() {
+  int remaining = trials.size() - trialNum;
+  textAlign(RIGHT);
+  fill(255);
+  textFont(createFont("Arial", 20));
+  text("Clicks left: " + remaining, width - 20, 30);
+  textFont(createFont("Arial", 16));
+  textAlign(CENTER);
 }
 
 void drawDottedLines() {
@@ -154,11 +183,13 @@ void checkMouse() {
   {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
     hits++; 
+    currentStreak++;
   } 
   else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
     misses++;
+    currentStreak = 0;
   }
 
   trialNum++; //Increment trial number
@@ -185,13 +216,17 @@ Rectangle getButtonLocation(int i) //for a given button ID, what is its location
 void drawButton(int i)
 {
   Rectangle bounds = getButtonLocation(i);
+  strokeWeight(0);
 
   if (trials.get(trialNum) == i) // see if current button is the target
     fill(0, 255, 255); // if so, fill cyan
   else if (trialNum+1 < trials.size() && trials.get(trialNum+1) == i) // see if current button is the next target
     fill(0, 80, 80);
-  else
-    fill(1); // if not, fill gray
+  else { 
+    stroke(20);
+    strokeWeight(2);
+    fill(0); // if not, fill black
+  }
 
   rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
 }
