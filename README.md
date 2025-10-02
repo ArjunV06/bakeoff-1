@@ -4,7 +4,7 @@
 ## Setup
 To clone the repository, first run
 ```
-git clone https://github.com/blobotic/bakeoff-1.git
+git clone https://github.com/ArjunV06/bakeoff-1.git
 ```
 Download the Processing IDE [here](https://processing.org/download). 
 
