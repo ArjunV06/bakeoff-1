@@ -4,7 +4,6 @@ import java.awt.Robot;
 import java.util.ArrayList;
 import java.util.Collections;
 import processing.core.PApplet;
-import processing.sound.*; // Import Sound library
 
 //when in doubt, consult the Processsing reference: https://processing.org/reference/
 
@@ -25,10 +24,6 @@ int numRepeats = 1; //sets the number of times each button repeats in the test
 float animationOffset = 0;
 float pulsePhase = 0;
 
-// Sound variables
-SoundFile hitSound;
-SoundFile missSound;
-
 void setup()
 {
   size(700, 700); // set the size of the window
@@ -39,10 +34,6 @@ void setup()
   frameRate(60);
   ellipseMode(CENTER); //ellipses are drawn from the center (BUT RECTANGLES ARE NOT!)
   //rectMode(CENTER); //enabling will break the scaffold code, but you might find it easier to work with centered rects
-
-  // Load sound files
-  hitSound = new SoundFile(this, "c-371145.mp3");
-  missSound = new SoundFile(this, "incorrect-293358.mp3");
 
   try {
     robot = new Robot(); //create a "Java Robot" class that can move the system cursor
@@ -294,14 +285,12 @@ void checkMouse() {
     System.out.println("HIT! " + trialNum + " " + (millis() - startTime)); // success
     hits++; 
     currentStreak++;
-    hitSound.play(); // Play hit sound
   } 
   else
   {
     System.out.println("MISSED! " + trialNum + " " + (millis() - startTime)); // fail
     misses++;
     currentStreak = 0;
-    missSound.play(); // Play miss sound
   }
 
   trialNum++; //Increment trial number
