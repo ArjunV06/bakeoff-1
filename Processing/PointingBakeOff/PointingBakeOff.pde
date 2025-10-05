@@ -24,6 +24,7 @@ int numRepeats = 1; //sets the number of times each button repeats in the test
 // Animation variables
 float animationOffset = 0;
 float pulsePhase = 0;
+float warningPulse = 0;
 
 // Sound variables
 SoundFile hitSound;
@@ -91,6 +92,7 @@ void draw()
   // Update animation
   animationOffset -= 0.5; // Speed of flowing animation (negative for reverse)
   pulsePhase += 0.1; // Speed of pulsing
+  warningPulse += 0.15; // Speed of warning pulse for incorrect hovers
 
   for (int i = 0; i < 16; i++)// for all button
     drawButton(i); //draw button
@@ -329,24 +331,39 @@ void drawButton(int i)
 {
   Rectangle bounds = getButtonLocation(i);
   strokeWeight(0);
+  
+  // Check if mouse is over this button
+  boolean isMouseOver = (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && 
+                        (mouseY > bounds.y && mouseY < bounds.y + bounds.height);
 
   if (trials.get(trialNum) == i) { // see if current button is the target
-    // Check if mouse is over this target
-    boolean isMouseOver = (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && 
-                          (mouseY > bounds.y && mouseY < bounds.y + bounds.height);
-    
     if (isMouseOver) {
       fill(50, 255, 50); // Green when hovering over target
     } else {
       fill(0, 255, 255); // Cyan otherwise
     }
   }
-  else if (trialNum+1 < trials.size() && trials.get(trialNum+1) == i) // see if current button is the next target
-    fill(0, 80, 80);
+  else if (trialNum+1 < trials.size() && trials.get(trialNum+1) == i) { // see if current button is the next target
+    if (isMouseOver) {
+      // Warning animation for hovering over next target (not current)
+      float pulse = sin(warningPulse) * 0.5 + 0.5;
+      fill(60 + pulse * 40, 40, 40); // Subtle red pulse
+    } else {
+      fill(0, 80, 80);
+    }
+  }
   else { 
-    stroke(20);
-    strokeWeight(2);
-    fill(0); // if not, fill black
+    if (isMouseOver) {
+      // Warning animation for hovering over incorrect button
+      float pulse = sin(warningPulse) * 0.5 + 0.5;
+      stroke(255, 0, 0, 150 + pulse * 105); // Red pulsing outline
+      strokeWeight(3 + pulse * 2); // Pulsing thickness
+      fill(80 + pulse * 60, 0, 0); // Red pulsing fill
+    } else {
+      stroke(20);
+      strokeWeight(2);
+      fill(0); // if not, fill black
+    }
   }
 
   rect(bounds.x, bounds.y, bounds.width, bounds.height); //draw button
