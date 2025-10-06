@@ -30,6 +30,15 @@ float warningPulse = 0;
 SoundFile hitSound;
 SoundFile missSound;
 
+// Tutorial variables
+boolean inTutorial = true;
+int tutorialStep = 0;
+int tutorialTargetButton = 5; // Button to click in tutorial
+boolean tutorialComplete = false;
+int tutorialHits = 0;
+int tutorialMisses = 0;
+final int TUTORIAL_TARGETS = 3; // Number of practice targets
+
 void setup()
 {
   size(700, 700); // set the size of the window
@@ -69,6 +78,11 @@ void setup()
 void draw()
 {
   background(0); //set background to black
+
+  if (inTutorial) {
+    drawTutorial();
+    return;
+  }
 
   if (trialNum >= trials.size()) //check to see if test is over
   {
@@ -113,6 +127,129 @@ void draw()
   
   drawClicksRemaining();
   drawStreak();
+}
+
+void drawTutorial() {
+  // Update animation for tutorial
+  animationOffset -= 0.5;
+  pulsePhase += 0.1;
+  warningPulse += 0.15;
+  
+  // Draw title
+  fill(255);
+  textFont(createFont("Arial", 24));
+  text("TUTORIAL", width/2, 50);
+  textFont(createFont("Arial", 16));
+  
+  // Draw tutorial instructions based on step
+  fill(200);
+  if (tutorialStep == 0) {
+    text("Welcome to the Clicking Test!", width/2, 100);
+    text("This tutorial will teach you the basics.", width/2, 120);
+    text("", width/2, 140);
+    text("Your goal: Click the CYAN colored buttons as fast as possible", width/2, 160);
+    text("", width/2, 180);
+    fill(0, 255, 255);
+    text("CYAN = Current Target", width/2, 200);
+    fill(0, 80, 80);
+    text("DARK CYAN = Next Target", width/2, 220);
+    fill(200);
+    text("", width/2, 240);
+    text("Click anywhere or press any key to continue...", width/2, 280);
+  } 
+  else if (tutorialStep == 1) {
+    text("Visual Feedback System:", width/2, 100);
+    text("", width/2, 120);
+    text("• Your cursor turns GREEN when over the target", width/2, 140);
+    text("• Your cursor turns RED when not over the target", width/2, 160);
+    text("• A flowing line shows the path to your target", width/2, 180);
+    text("• The line is GREEN when you're over the target", width/2, 200);
+    text("• The line is YELLOW when you need to move to the target", width/2, 220);
+    text("", width/2, 240);
+    text("Click anywhere or press any key to continue...", width/2, 280);
+  }
+  else if (tutorialStep == 2) {
+    text("Let's Practice!", width/2, 100);
+    text("Click the " + TUTORIAL_TARGETS + " cyan targets below", width/2, 120);
+    text("Targets clicked: " + tutorialHits + "/" + TUTORIAL_TARGETS, width/2, 140);
+    
+    if (tutorialMisses > 0) {
+      fill(255, 100, 100);
+      text("Misses: " + tutorialMisses + " (Try to click accurately!)", width/2, 160);
+      fill(200);
+    }
+    
+    // Draw practice grid
+    for (int i = 0; i < 16; i++) {
+      drawTutorialButton(i);
+    }
+    
+    // Draw tutorial dotted line
+    drawTutorialDottedLine();
+    
+    // Draw cursor
+    Rectangle currentBounds = getButtonLocation(tutorialTargetButton);
+    boolean isInTarget = (mouseX > currentBounds.x && mouseX < currentBounds.x + currentBounds.width) && 
+                         (mouseY > currentBounds.y && mouseY < currentBounds.y + currentBounds.height);
+    
+    if (isInTarget) {
+      fill(50, 255, 50, 200);
+    } else {
+      fill(255, 0, 0, 200);
+    }
+    ellipse(mouseX, mouseY, 20, 20);
+    
+    if (tutorialHits >= TUTORIAL_TARGETS) {
+      fill(50, 255, 50);
+      text("Great job! You're ready for the test!", width/2, height - 100);
+      text("Click anywhere or press any key to start the real test...", width/2, height - 60);
+      tutorialComplete = true;
+    }
+  }
+}
+
+void drawTutorialButton(int i) {
+  Rectangle bounds = getButtonLocation(i);
+  strokeWeight(0);
+  
+  boolean isMouseOver = (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && 
+                        (mouseY > bounds.y && mouseY < bounds.y + bounds.height);
+
+  if (tutorialTargetButton == i && tutorialStep == 2 && !tutorialComplete) {
+    if (isMouseOver) {
+      fill(50, 255, 50); // Green when hovering
+    } else {
+      fill(0, 255, 255); // Cyan for target
+    }
+  }
+  else {
+    if (isMouseOver && tutorialStep == 2 && !tutorialComplete) {
+      float pulse = sin(warningPulse) * 0.5 + 0.5;
+      stroke(255, 0, 0, 150 + pulse * 105);
+      strokeWeight(3 + pulse * 2);
+      fill(80 + pulse * 60, 0, 0);
+    } else {
+      stroke(20);
+      strokeWeight(2);
+      fill(0);
+    }
+  }
+  
+  rect(bounds.x, bounds.y, bounds.width, bounds.height);
+}
+
+void drawTutorialDottedLine() {
+  if (tutorialStep != 2 || tutorialComplete) return;
+  
+  Rectangle currentBounds = getButtonLocation(tutorialTargetButton);
+  float currentCenterX = currentBounds.x + currentBounds.width / 2.0;
+  float currentCenterY = currentBounds.y + currentBounds.height / 2.0;
+  
+  boolean isInTarget = (mouseX > currentBounds.x && mouseX < currentBounds.x + currentBounds.width) && 
+                       (mouseY > currentBounds.y && mouseY < currentBounds.y + currentBounds.height);
+  
+  drawAnimatedLine(mouseX, mouseY, currentCenterX, currentCenterY, true, isInTarget);
+  noStroke();
 }
 
 int currentStreak = 0;
@@ -275,7 +412,35 @@ void drawArrow(float x, float y, float dx, float dy, boolean isInTarget) {
 }
 
 void checkMouse() {
-    if (trialNum >= trials.size()) //if task is over, just return
+  // Handle tutorial clicks
+  if (inTutorial) {
+    if (tutorialStep < 2) {
+      tutorialStep++;
+    } else if (tutorialStep == 2) {
+      if (tutorialComplete) {
+        inTutorial = false;
+        tutorialStep = 0;
+      } else {
+        // Check if clicked on tutorial target
+        Rectangle bounds = getButtonLocation(tutorialTargetButton);
+        if ((mouseX > bounds.x && mouseX < bounds.width + bounds.x) && 
+            (mouseY > bounds.y && mouseY < bounds.height + bounds.y)) {
+          tutorialHits++;
+          hitSound.play();
+          // Generate new random target for next practice
+          if (tutorialHits < TUTORIAL_TARGETS) {
+            tutorialTargetButton = (int)random(16);
+          }
+        } else {
+          tutorialMisses++;
+          missSound.play();
+        }
+      }
+    }
+    return;
+  }
+
+  if (trialNum >= trials.size()) //if task is over, just return
     return;
 
   if (trialNum == 0) //check if first click, if so, start timer
@@ -310,7 +475,6 @@ void checkMouse() {
 
   //in this example code, we move the mouse back to the middle
   // robot.mouseMove(width/2, (height)/2); //on click, move cursor to roughly center of window!
-
 }
 
 void mousePressed() // test to see if hit was in target!
