@@ -162,20 +162,32 @@ void drawTutorial() {
     text("", width/2, 120);
     text("• Your cursor turns GREEN when over the target", width/2, 140);
     text("• Your cursor turns RED when not over the target", width/2, 160);
-    text("• A flowing line shows the path to your target", width/2, 180);
-    text("• The line is GREEN when you're over the target", width/2, 200);
-    text("• The line is YELLOW when you need to move to the target", width/2, 220);
-    text("", width/2, 240);
-    text("Click anywhere or press any key to continue...", width/2, 280);
+    text("", width/2, 180);
+    text("• A flowing line shows the path to your target", width/2, 200);
+    text("• The line is GREEN when you're over the target", width/2, 220);
+    text("• The line is YELLOW when you need to move to the target", width/2, 240);
+    text("", width/2, 260);
+    text("Click anywhere or press any key to continue...", width/2, 300);
   }
   else if (tutorialStep == 2) {
-    text("Let's Practice!", width/2, 100);
-    text("Click the " + TUTORIAL_TARGETS + " cyan targets below", width/2, 120);
-    text("Targets clicked: " + tutorialHits + "/" + TUTORIAL_TARGETS, width/2, 140);
+    text("Tips for Success:", width/2, 100);
+    text("", width/2, 120);
+    text("• Speed matters, but accuracy matters MORE", width/2, 140);
+    text("• Missing clicks adds a time penalty to your score", width/2, 160);
+    text("• Aim carefully before clicking", width/2, 180);
+    text("", width/2, 200);
+    text("• Follow the flowing line to find targets quickly", width/2, 220);
+    text("• Use the next target preview (dark cyan) to plan ahead", width/2, 240);
+    text("", width/2, 260);
+    text("Click anywhere or press any key to continue...", width/2, 300);
+  }
+  else if (tutorialStep == 3) {
+    text("Now it's your turn! Click the " + TUTORIAL_TARGETS + " cyan targets to practice", width/2, 100);
+    text("Targets clicked: " + tutorialHits + "/" + TUTORIAL_TARGETS, width/2, 120);
     
     if (tutorialMisses > 0) {
       fill(255, 100, 100);
-      text("Misses: " + tutorialMisses + " (Try to click accurately!)", width/2, 160);
+      text("Misses: " + tutorialMisses + " (Try to click accurately!)", width/2, 140);
       fill(200);
     }
     
@@ -201,8 +213,8 @@ void drawTutorial() {
     
     if (tutorialHits >= TUTORIAL_TARGETS) {
       fill(50, 255, 50);
-      text("Great job! You're ready for the test!", width/2, height - 100);
-      text("Click anywhere or press any key to start the real test...", width/2, height - 60);
+      text("Perfect! You're ready!", width/2, height - 100);
+      text("Press any key or click to begin the real test...", width/2, height - 60);
       tutorialComplete = true;
     }
   }
@@ -215,7 +227,7 @@ void drawTutorialButton(int i) {
   boolean isMouseOver = (mouseX > bounds.x && mouseX < bounds.x + bounds.width) && 
                         (mouseY > bounds.y && mouseY < bounds.y + bounds.height);
 
-  if (tutorialTargetButton == i && tutorialStep == 2 && !tutorialComplete) {
+  if (tutorialTargetButton == i && tutorialStep == 3 && !tutorialComplete) {
     if (isMouseOver) {
       fill(50, 255, 50); // Green when hovering
     } else {
@@ -223,7 +235,7 @@ void drawTutorialButton(int i) {
     }
   }
   else {
-    if (isMouseOver && tutorialStep == 2 && !tutorialComplete) {
+    if (isMouseOver && tutorialStep == 3 && !tutorialComplete) {
       float pulse = sin(warningPulse) * 0.5 + 0.5;
       stroke(255, 0, 0, 150 + pulse * 105);
       strokeWeight(3 + pulse * 2);
@@ -239,7 +251,7 @@ void drawTutorialButton(int i) {
 }
 
 void drawTutorialDottedLine() {
-  if (tutorialStep != 2 || tutorialComplete) return;
+  if (tutorialStep != 3 || tutorialComplete) return;
   
   Rectangle currentBounds = getButtonLocation(tutorialTargetButton);
   float currentCenterX = currentBounds.x + currentBounds.width / 2.0;
@@ -414,9 +426,9 @@ void drawArrow(float x, float y, float dx, float dy, boolean isInTarget) {
 void checkMouse() {
   // Handle tutorial clicks
   if (inTutorial) {
-    if (tutorialStep < 2) {
+    if (tutorialStep < 3) {
       tutorialStep++;
-    } else if (tutorialStep == 2) {
+    } else if (tutorialStep == 3) {
       if (tutorialComplete) {
         inTutorial = false;
         tutorialStep = 0;
@@ -553,3 +565,5 @@ void keyPressed()
   checkMouse();
   System.out.println("clicked");
 }
+
+//ALL IDEAS GENERATED INDEPENDENTLY, SOME IMPLEMENTATION WAS AIDED BY LLM TOOLS
